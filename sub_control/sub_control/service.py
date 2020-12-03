@@ -1,6 +1,7 @@
 import rclpy
 from rclpy.node import Node
 
+from sub_control.state import State
 from sub_control.atmega import Atmega
 from sub_control_interfaces.srv import ControlAlive, ControlDepth, ControlState, ControlWrite, ControlWriteDepth, ControlWriteState
 
@@ -8,12 +9,15 @@ class ControlService(Node):
     """
     Service for controlling sub.
     """
-    def __init__(self):
+    def __init__(self, sim=False):
         """
         Register services
         """
         super().__init__('control_service')
-        self.atmega = Atmega()
+        self.declare_parameter("SIM")
+        self.sim_enabled = self.get_parameter("SIM").get_parameter_value().bool_value
+
+        self.atmega = Atmega(self.sim_enabled)
         self.logger = self.get_logger()
         self.control_alive_service = self.create_service(ControlAlive, "control_alive", self.alive)
         self.control_state_service = self.create_service(ControlState, "control_state", self.state)
@@ -23,6 +27,20 @@ class ControlService(Node):
             self.create_service(ControlWriteState, "control_write_state", self.write_state)
         self.control_write_depth_service = \
             self.create_service(ControlWriteDepth, "control_write_depth", self.write_depth)
+
+        self.param_timer = self.create_timer(2, self.param_timer_callback)
+
+    def param_timer_callback(self):
+        sim = self.get_parameter("SIM").get_parameter_value().bool_value
+
+        sim_param = rclpy.parameter.Parameter(
+            "SIM",
+            rclpy.Parameter.Type.BOOL,
+            sim
+        )
+
+        params = [sim_param]
+        self.set_parameters(params)
 
     def alive(self, request, response):
         response.data: bool = self.atmega.alive()

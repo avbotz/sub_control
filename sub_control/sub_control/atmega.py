@@ -1,18 +1,29 @@
 import serial
+import time
+import rclpy
+from std_msgs.msg import String
+
 from sub_control.state import State
 
 PORT = "/dev/ttyUSB0"
+SIM_PORT = "/tmp/sim_port.txt"
 
 class Atmega:
     """
     Utilities to interface with the Arduino on board the sub.
     """
-    def __init__(self):
+    def __init__(self, sim=False):
         """
         initialize stuff
         """
-        self.state = [0, 0, 0, 0, 0, 0]
-        self.serial = serial.Serial(PORT)
+        self._state = [0, 0, 0, 0, 0, 0]
+        self.sim = sim
+        if self.sim:
+            self.serial = open(SIM_PORT, "a+")
+            self.node = rclpy.create_node("atmega_node")
+            self.publisher = self.node.create_publisher(String, "/nemo/commands", 1)
+        else:
+            self.serial = serial.Serial(PORT)
 
     def write(self, command: str):
         """
@@ -20,10 +31,20 @@ class Atmega:
 
         :param command: command to send (str)
         """
-        self.serial.write(bytes(command))
+        if self.sim:
+            msg = String()
+            msg.data = command
+            self.publisher.publish(msg)
+            print("published to sim")
+        else:
+            self.serial.write(bytes(command))
+
+    def read(self):
+        time.sleep(0.1)
+        return self.serial.readline()
 
     def write_state(self, state: State):
-        self.relative()
+        self.relative(state)
 
     def write_depth(self, depth: float):
         self.write("z {depth}")
@@ -32,8 +53,8 @@ class Atmega:
         """
         Send relative state command (relative to current position).
         """
-        self.serial.write(bytes(
-            f"s {state.x} {state.y} {state.z} {state.yaw} {state.pitch} {state.roll}\n"))
+        self.write(
+            f"s {state.x} {state.y} {state.z} {state.yaw} {state.pitch} {state.roll}\n")
 
     def alive(self):
         """
@@ -41,9 +62,9 @@ class Atmega:
         """
 
         # Send request
-        self.serial.write("a\n")
+        self.write("a\n")
 
-        killed = int(self.serial.read())
+        killed = int(self.read())
         return not killed
 
     def depth(self):
@@ -52,17 +73,17 @@ class Atmega:
         """
 
         # Send request for depth
-        self.serial.write("w\n")
+        self.write("w\n")
 
-        return float(self.serial.read())
+        return float(self.read())
 
     def state(self):
         """
         Get current state
         """
         # Send request for state
-        self.serial.write("c\n")
+        self.write("c\n")
 
-        x, y, z, yaw, pitch, roll = map(float, self.serial.read().split())
+        x, y, z, yaw, pitch, roll = map(float, self.read().split())
 
         return State(x, y, z, yaw, pitch, roll)
