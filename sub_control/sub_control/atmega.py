@@ -64,8 +64,8 @@ class Atmega:
         # Send request
         self.write("a\n")
 
-        killed = int(self.read())
-        return not killed
+        alive = bool(int(self.read()))
+        return alive
 
     def depth(self):
         """
