@@ -30,6 +30,9 @@ class ControlService(Node):
 
         self.param_timer = self.create_timer(2, self.param_timer_callback)
 
+        # Set power
+        self.atmega.set_power(0.15)
+
     def param_timer_callback(self):
         sim = self.get_parameter("SIM").get_parameter_value().bool_value
 

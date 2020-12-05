@@ -43,11 +43,14 @@ class Atmega:
         time.sleep(0.1)
         return self.serial.readline()
 
+    def set_power(self, power: float):
+        self.write("p 0.15\n")
+
     def write_state(self, state: State):
         self.relative(state)
 
     def write_depth(self, depth: float):
-        self.write("z {depth}")
+        self.write("z {depth}\n")
 
     def relative(self, state: State):
         """
