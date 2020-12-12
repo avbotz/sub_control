@@ -3,7 +3,7 @@ import time
 import rclpy
 from std_msgs.msg import String
 
-from sub_control.state import State
+from sub_control_interfaces.msg import State
 
 PORT = "/dev/ttyUSB0"
 SIM_PORT = "/tmp/sim_port.txt"
@@ -25,6 +25,8 @@ class Atmega:
         else:
             self.serial = serial.Serial(PORT)
 
+        self.write("p 0.2\n")
+
     def write(self, command: str):
         """
         Write command to arduino
@@ -35,7 +37,7 @@ class Atmega:
             msg = String()
             msg.data = command
             self.publisher.publish(msg)
-            print("published to sim")
+            print(f"published to sim {command}")
         else:
             self.serial.write(bytes(command))
 
@@ -89,4 +91,4 @@ class Atmega:
 
         x, y, z, yaw, pitch, roll = map(float, self.read().split())
 
-        return State(x, y, z, yaw, pitch, roll)
+        return State(x=x, y=y, z=z, yaw=yaw, pitch=pitch, roll=roll)

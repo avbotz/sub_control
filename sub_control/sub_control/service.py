@@ -1,7 +1,7 @@
 import rclpy
 from rclpy.node import Node
 
-from sub_control.state import State
+from sub_control_interfaces.msg import State
 from sub_control.atmega import Atmega
 from sub_control_interfaces.srv import ControlAlive, ControlDepth, ControlState, ControlWrite, ControlWriteDepth, ControlWriteState
 
@@ -72,12 +72,12 @@ class ControlService(Node):
         return response
 
     def write_state(self, request, response):
-        state: State = State(request.x,
-                             request.y,
-                             request.z,
-                             request.yaw,
-                             request.pitch,
-                             request.roll)
+        state: State = State(x=request.x,
+                             y=request.y,
+                             z=request.z,
+                             yaw=request.yaw,
+                             pitch=request.pitch,
+                             roll=request.roll)
         self.logger.info(f"Received request for state write. State: '{state}'")
 
         self.atmega.write_state(state)

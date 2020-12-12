@@ -21,6 +21,7 @@ find_package(rosidl_default_generators REQUIRED)
 
 # Generate messages
 rosidl_generate_interfaces(${PROJECT_NAME}
+    "msg/State.msg"
     "srv/ControlAlive.srv"
     "srv/ControlDepth.srv"
     "srv/ControlState.srv"
