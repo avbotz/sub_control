@@ -19,7 +19,6 @@ class Atmega:
         self._state = [0, 0, 0, 0, 0, 0]
         self.sim = sim
         if self.sim:
-            self.serial = open(SIM_PORT, "a+")
             self.node = rclpy.create_node("atmega_node")
             self.publisher = self.node.create_publisher(String, "/nemo/commands", 1)
         else:
@@ -43,13 +42,20 @@ class Atmega:
 
     def read(self):
         time.sleep(0.1)
-        return self.serial.readline()
+        if self.sim:
+            return open(SIM_PORT, "r+").readline()
+        else:
+            return self.serial.readline()
 
     def set_power(self, power: float):
-        self.write("p 0.15\n")
+        self.write("p 0.2\n")
 
     def write_state(self, state: State):
-        self.relative(state)
+        """
+        Send absolute state command.
+        """
+        self.write(
+            f"s {state.x} {state.y} {state.z} {state.yaw} {state.pitch} {state.roll}\n")
 
     def write_depth(self, depth: float):
         self.write("z {depth}\n")
@@ -59,7 +65,7 @@ class Atmega:
         Send relative state command (relative to current position).
         """
         self.write(
-            f"s {state.x} {state.y} {state.z} {state.yaw} {state.pitch} {state.roll}\n")
+            f"r {state.x} {state.y} {state.z} {state.yaw} {state.pitch} {state.roll}\n")
 
     def alive(self):
         """
@@ -74,7 +80,7 @@ class Atmega:
 
     def depth(self):
         """
-        Get current depth of sub
+        Get current depth (altitude above floor) of sub
         """
 
         # Send request for depth
