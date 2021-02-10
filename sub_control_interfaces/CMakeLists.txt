@@ -28,6 +28,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
     "srv/ControlWrite.srv"
     "srv/ControlWriteDepth.srv"
     "srv/ControlWriteState.srv"
+    "srv/ControlSetPower.srv"
 )
 
 if(BUILD_TESTING)

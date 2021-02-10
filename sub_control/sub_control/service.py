@@ -27,6 +27,8 @@ class ControlService(Node):
             self.create_service(ControlWriteState, "control_write_state", self.write_state)
         self.control_write_depth_service = \
             self.create_service(ControlWriteDepth, "control_write_depth", self.write_depth)
+        self.control_set_power_service = \
+            self.create_service(ControlSetPower, "control_set_power", self.set_power)
 
         self.param_timer = self.create_timer(2, self.param_timer_callback)
 
@@ -87,6 +89,9 @@ class ControlService(Node):
         self.logger.info(f"Received request for depth write. Depth: '{request.dist}'")
         self.atmega.write_depth(request.dist)
 
+    def set_power(self, request, response):
+        self.logger.info(f"Received request for set power. Power: '{request.power}'")
+        self.atmega.set_power(request.power)
 
 
 def main(args=None):

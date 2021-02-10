@@ -6,7 +6,8 @@ from std_msgs.msg import String
 from sub_control_interfaces.msg import State
 
 PORT = "/dev/ttyUSB0"
-SIM_PORT = "/tmp/sim_port.txt"
+BB_TO_SIM = "/tmp/bb_to_sim.txt"
+SIM_TO_BB = "/tmp/sim_to_bb.txt"
 
 class Atmega:
     """
@@ -19,12 +20,10 @@ class Atmega:
         self._state = [0, 0, 0, 0, 0, 0]
         self.sim = sim
         if self.sim:
-            self.node = rclpy.create_node("atmega_node")
-            self.publisher = self.node.create_publisher(String, "/nemo/commands", 1)
+            self.sim_to_bb = open(SIM_TO_BB, "r+")
+            self.bb_to_sim = open(BB_TO_SIM, "w+")
         else:
             self.serial = serial.Serial(PORT)
-
-        self.write("p 0.2\n")
 
     def write(self, command: str):
         """
@@ -33,9 +32,7 @@ class Atmega:
         :param command: command to send (str)
         """
         if self.sim:
-            msg = String()
-            msg.data = command
-            self.publisher.publish(msg)
+            self.bb_to_sim.write(command)
             print(f"published to sim {command}")
         else:
             self.serial.write(bytes(command))
@@ -43,12 +40,12 @@ class Atmega:
     def read(self):
         time.sleep(0.1)
         if self.sim:
-            return open(SIM_PORT, "r+").readline()
+            return self.sim_to_bb.readline()
         else:
             return self.serial.readline()
 
     def set_power(self, power: float):
-        self.write("p 0.2\n")
+        self.write("p {power}\n")
 
     def write_state(self, state: State):
         """
