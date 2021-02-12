@@ -20,7 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'service = sub_control.service:main'
+            'service = sub_control.service:main',
+            'tuning = sub_control.tuning:main'
         ],
     },
 )

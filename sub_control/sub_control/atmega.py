@@ -33,7 +33,7 @@ class Atmega:
         """
         if self.sim:
             self.bb_to_sim.write(command)
-            print(f"published to sim {command}")
+            self.bb_to_sim.flush()
         else:
             self.serial.write(bytes(command))
 
@@ -45,7 +45,7 @@ class Atmega:
             return self.serial.readline()
 
     def set_power(self, power: float):
-        self.write("p {power}\n")
+        self.write(f"p {power}\n")
 
     def write_state(self, state: State):
         """
@@ -55,7 +55,7 @@ class Atmega:
             f"s {state.x} {state.y} {state.z} {state.yaw} {state.pitch} {state.roll}\n")
 
     def write_depth(self, depth: float):
-        self.write("z {depth}\n")
+        self.write(f"z {depth}\n")
 
     def relative(self, state: State):
         """
