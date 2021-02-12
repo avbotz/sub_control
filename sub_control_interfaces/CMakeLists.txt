@@ -24,11 +24,11 @@ rosidl_generate_interfaces(${PROJECT_NAME}
     "msg/State.msg"
     "srv/ControlAlive.srv"
     "srv/ControlDepth.srv"
+    "srv/ControlSetPower.srv"
     "srv/ControlState.srv"
     "srv/ControlWrite.srv"
     "srv/ControlWriteDepth.srv"
     "srv/ControlWriteState.srv"
-    "srv/ControlSetPower.srv"
 )
 
 if(BUILD_TESTING)

@@ -3,7 +3,7 @@ from rclpy.node import Node
 
 from sub_control_interfaces.msg import State
 from sub_control.atmega import Atmega
-from sub_control_interfaces.srv import ControlAlive, ControlDepth, ControlState, ControlWrite, ControlWriteDepth, ControlWriteState
+from sub_control_interfaces.srv import ControlAlive, ControlDepth, ControlSetPower, ControlState, ControlWrite, ControlWriteDepth, ControlWriteState
 
 class ControlService(Node):
     """
