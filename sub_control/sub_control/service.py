@@ -23,17 +23,14 @@ class ControlService(Node):
         self.control_state_service = self.create_service(ControlState, "control_state", self.state)
         self.control_depth_service = self.create_service(ControlDepth, "control_depth", self.depth)
         self.control_write_service = self.create_service(ControlWrite, "control_write", self.write)
+        self.control_set_power_service = \
+            self.create_service(ControlSetPower, "control_set_power", self.set_power)
         self.control_write_state_service = \
             self.create_service(ControlWriteState, "control_write_state", self.write_state)
         self.control_write_depth_service = \
             self.create_service(ControlWriteDepth, "control_write_depth", self.write_depth)
-        self.control_set_power_service = \
-            self.create_service(ControlSetPower, "control_set_power", self.set_power)
 
         self.param_timer = self.create_timer(2, self.param_timer_callback)
-
-        # Set power
-        self.atmega.set_power(0.15)
 
     def param_timer_callback(self):
         sim = self.get_parameter("SIM").get_parameter_value().bool_value
@@ -68,8 +65,12 @@ class ControlService(Node):
         self.logger.info(f"Received request for depth. Depth: {response.depth}")
         return response
 
+    def set_power(self, request, response):
+        self.logger.info(f"Received request for set power. Power: {request.power}")
+        self.atmega.set_power(request.power)
+
     def write(self, request, response):
-        self.logger.info(f"Received request for manual write. Command: '{request.data}'")
+        self.logger.info(f"Received request for manual write. Command: {request.data}")
         self.atmega.write(request.data)
         return response
 
@@ -80,18 +81,14 @@ class ControlService(Node):
                              yaw=request.yaw,
                              pitch=request.pitch,
                              roll=request.roll)
-        self.logger.info(f"Received request for state write. State: '{state}'")
+        self.logger.info(f"Received request for state write. State: {state}")
 
         self.atmega.write_state(state)
         return response
 
     def write_depth(self, request, response):
-        self.logger.info(f"Received request for depth write. Depth: '{request.dist}'")
+        self.logger.info(f"Received request for depth write. Depth: {request.dist}")
         self.atmega.write_depth(request.dist)
-
-    def set_power(self, request, response):
-        self.logger.info(f"Received request for set power. Power: '{request.power}'")
-        self.atmega.set_power(request.power)
 
 
 def main(args=None):
