@@ -33,12 +33,12 @@ class Atmega:
         """
         if self.sim:
             self.bb_to_sim.write(command)
-            print(f"Published to sim: {command}")
+            self.bb_to_sim.flush()
         else:
             self.serial.write(bytes(command))
 
     def read(self):
-        time.sleep(0.3)
+        time.sleep(0.1)
         if self.sim:
             return self.sim_to_bb.readline()
         else:

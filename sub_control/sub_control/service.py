@@ -46,12 +46,12 @@ class ControlService(Node):
 
     def alive(self, request, response):
         response.data: bool = self.atmega.alive()
-        self.logger.info(f"Received alive request. Alive: {response.data}")
+        print(f"Received alive request. Alive: {response.data}", flush=True)
         return response
 
     def state(self, request, response):
         state: State = self.atmega.state()
-        self.logger.info(f"Received request for state. State: {state}")
+        print(f"Received request for state. State: {state}", flush=True)
         response.x = state.x
         response.y = state.y
         response.z = state.z
@@ -62,15 +62,16 @@ class ControlService(Node):
 
     def depth(self, request, response):
         response.depth: float = self.atmega.depth()
-        self.logger.info(f"Received request for depth. Depth: {response.depth}")
+        print(f"Received request for depth. Depth: {response.depth}", flush=True)
         return response
 
     def set_power(self, request, response):
-        self.logger.info(f"Received request for set power. Power: {request.power}")
+        print(f"Received request for set power. Power: {request.power}", flush=True)
         self.atmega.set_power(request.power)
+        return response
 
     def write(self, request, response):
-        self.logger.info(f"Received request for manual write. Command: {request.data}")
+        print(f"Received request for manual write. Command: {request.data}", flush=True)
         self.atmega.write(request.data)
         return response
 
@@ -81,14 +82,15 @@ class ControlService(Node):
                              yaw=request.yaw,
                              pitch=request.pitch,
                              roll=request.roll)
-        self.logger.info(f"Received request for state write. State: {state}")
+        print(f"Received request for state write. State: {state}", flush=True)
 
         self.atmega.write_state(state)
         return response
 
     def write_depth(self, request, response):
-        self.logger.info(f"Received request for depth write. Depth: {request.dist}")
+        print(f"Received request for depth write. Depth: {request.dist}", flush=True)
         self.atmega.write_depth(request.dist)
+        return response
 
 
 def main(args=None):
