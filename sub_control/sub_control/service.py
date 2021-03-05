@@ -51,7 +51,13 @@ class ControlService(Node):
 
     def state(self, request, response):
         state: State = self.atmega.state()
-        print(f"Received request for state. State: {state}", flush=True)
+        print("Received request for state. State: ({}, {}, {}, {}, {}, {})".format(
+            round(state.x, 2),
+            round(state.y, 2),
+            round(state.z, 2),
+            round(state.yaw, 2),
+            round(state.pitch, 2),
+            round(state.roll, 2)), flush=True)
         response.x = state.x
         response.y = state.y
         response.z = state.z
@@ -62,11 +68,11 @@ class ControlService(Node):
 
     def depth(self, request, response):
         response.depth: float = self.atmega.depth()
-        print(f"Received request for depth. Depth: {response.depth}", flush=True)
+        print(f"Received request for depth. Depth: {round(response.depth, 2)}", flush=True)
         return response
 
     def set_power(self, request, response):
-        print(f"Received request for set power. Power: {request.power}", flush=True)
+        print(f"Received request for set power. Power: {round(request.power, 2)}", flush=True)
         self.atmega.set_power(request.power)
         return response
 
@@ -82,13 +88,18 @@ class ControlService(Node):
                              yaw=request.yaw,
                              pitch=request.pitch,
                              roll=request.roll)
-        print(f"Received request for state write. State: {state}", flush=True)
-
+        print("Received request for write state. State: ({}, {}, {}, {}, {}, {})".format(
+            round(state.x, 2),
+            round(state.y, 2),
+            round(state.z, 2),
+            round(state.yaw, 2),
+            round(state.pitch, 2),
+            round(state.roll, 2)), flush=True)
         self.atmega.write_state(state)
         return response
 
     def write_depth(self, request, response):
-        print(f"Received request for depth write. Depth: {request.dist}", flush=True)
+        print(f"Received request for depth write. Depth: {round(request.dist, 2)}", flush=True)
         self.atmega.write_depth(request.dist)
         return response
 
