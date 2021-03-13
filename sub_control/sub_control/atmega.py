@@ -5,7 +5,7 @@ from std_msgs.msg import String
 
 from sub_control_interfaces.msg import State
 
-PORT = "/dev/ttyUSB0"
+PORT = "/dev/ttyACM0"
 BB_TO_SIM = "/tmp/bb_to_sim.txt"
 SIM_TO_BB = "/tmp/sim_to_bb.txt"
 
@@ -35,7 +35,7 @@ class Atmega:
             self.bb_to_sim.write(command)
             self.bb_to_sim.flush()
         else:
-            self.serial.write(bytes(command))
+            self.serial.write(bytes(command, 'utf8'))
 
     def read(self):
         time.sleep(0.1)
