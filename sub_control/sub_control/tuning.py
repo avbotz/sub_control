@@ -10,7 +10,7 @@ from datetime import datetime
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from sub_control_interfaces.srv import ControlWrite
+from sub_control.atmega import Atmega
 
 # Don't forget to update these gains after the gains are updated in Nautical
 GAINS = [
@@ -28,8 +28,10 @@ NUM_GAINS = 3
 
 class TuningGui(QMainWindow):
 
-	def __init__(self):
+	def __init__(self, sim=False):
 		QMainWindow.__init__(self)
+
+		self.atmega = Atmega(sim)
 
 		self.setMinimumSize(QSize(1200, 400))    
 		self.setWindowTitle("PID Tuner") 
@@ -66,11 +68,6 @@ class TuningGui(QMainWindow):
 		pybutton.clicked.connect(self.clickMethod)
 		pybutton.resize(200, 32)
 		pybutton.move(125, 325)      
-
-		# Setup service client to send commands to sub_control's service
-		self.node = Node("temp")
-		self.client = self.node.create_client(ControlWrite, 'control_write')
-		self.request = ControlWrite.Request()
 
 	def createBoxes(self, x, y):
 		""" Creates 7 rows of 3 boxes each to type PID values into """
@@ -172,19 +169,16 @@ class TuningGui(QMainWindow):
 	def clickMethod(self):
 		""" Once update button is clicked, sends gains to Nautical """
 		if self.isValidInputBoxes():
-			# Make sure control service is ready to receive information
-			self.client.wait_for_service()
+			new_gains = self.readInputBoxes()
 
 			# See which gains have changed to send over
-			new_gains = self.readInputBoxes()
 			for i in range(DOF + 1):
 				if GAINS[i] != new_gains[i]:
-					self.request.data = "u {} {} {} {}\n".format(
+					self.atmega.write("u {} {} {} {}\n".format(
 						i, 
 						new_gains[i][0], 
 						new_gains[i][1], 
-						new_gains[i][2])
-					self.client.call_async(self.request)
+						new_gains[i][2]))
 					GAINS[i] = new_gains[i]
 					time.sleep(0.3)
 
@@ -203,9 +197,11 @@ def main(args=None):
 	rclpy.init(args=args)
 
 	node = Node('control_tuning')
+	node.declare_parameter("SIM")
+	sim_on = node.get_parameter("SIM").get_parameter_value().bool_value
 
 	app = QApplication(sys.argv)
-	mainWin = TuningGui()
+	mainWin = TuningGui(sim_on)
 	mainWin.show()
 	sys.exit(app.exec_())
 
