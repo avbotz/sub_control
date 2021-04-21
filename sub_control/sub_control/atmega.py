@@ -40,6 +40,7 @@ class Atmega:
     def read(self):
         time.sleep(0.1)
         if self.sim:
+            time.sleep(0.2)
             return self.sim_to_bb.readline()
         else:
             return self.serial.readline()
